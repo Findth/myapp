@@ -1,60 +1,261 @@
 <!DOCTYPE html>
-<!--
-    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
-
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
 <html>
+	<head>
+		<title>Petit Jeu</title>
+		<style>
+			#jeu{
+				width: 300px;
+				height: 496px;
+				border: black solid 2px;
+				padding: 0px;
+			}
+			#square{
+				width: 30px;
+				height: 30px;
+				background-color: #74AD5A;
+				position: absolute;
+				left: 0px;
+				top: 0px;
+				margin-left: 10px;
+				margin-top: 10px;
+			}
+			#basket{
+				width: 30px;
+				height: 30px;
+				background-color: blue;
+				position: absolute;
+				left: 135px;
+				top: 476px;
+				margin-left: 10px
+			}
+			#score{
+				position: absolute;
+				top: 15px;
+				left: 15px;
+				display: none;
+				width: 300px
+			}
+			#setup{
+				position: absolute;
+				top: 40px;
+				left: 320px;
+			}
+			#stop{
+				width: 40px;
+				height: 40px;
+				position: absolute;
+				top: 10px;
+				left: 270px;
+				display: none;
+			}
+			p{
+				margin: 10px;
+				margin-bottom: 0px;
+				cursor: pointer;
+			}
+			
+			p.color:hover, a:hover{
+				color: #FF0000;
+			}
+			#menu{
+				width: 280px;
+				height: 300px;
+				position: absolute;
+				top: 150px;
+				left: 20px;
+				text-align: center;
+				font-size: 26px;
+				font-weight: bold;
+			}
+			#menustart{
+				display:block;
+			}
+			#menustop{
+				display: none;
+			}
+			#menuend{
+				display: none;
+				font-size: 30px
+			}
+			a{
+				font-size: 16px;
+				cursor: pointer;
+			}
+			#lifes{
+				position: absolute;
+				left: 190px;
+			}
+			#d1,#c1,#c3{
+				color:red
+			}
+		</style>
+	</head>
+	<body onkeydown="touche(event)">
+		<div id="jeu" style="background:cyan">
+			<input type="button" id="stop" value="stop" onclick="stop()">
+			<div id="square"></div>
+			<div id="basket"></div>
+			<div id="score">SCORE: <span id="pts"></span><span id="lifes"></span></div>
+			<div id="menu">
+				<div id="menustart">
+					<p>DIFFICULTY</p>
+						<a id="d0" onclick="difficult = 0;this.style.color='red';document.getElementById('d1').style.color='black';document.getElementById('d2').style.color='black';document.getElementById('d3').style.color='black';document.getElementById('d4').style.color='black';">NEWBIE</a>&nbsp;
+						<a id="d1" onclick="difficult = 1;this.style.color='red';document.getElementById('d0').style.color='black';document.getElementById('d2').style.color='black';document.getElementById('d3').style.color='black';document.getElementById('d4').style.color='black';">NORMAL</a>&nbsp;
+						<a id="d2" onclick="difficult = 2;this.style.color='red';document.getElementById('d1').style.color='black';document.getElementById('d0').style.color='black';document.getElementById('d3').style.color='black';document.getElementById('d4').style.color='black';">CONFIRMED</a>&nbsp;
+						<a id="d3" onclick="difficult = 3;this.style.color='red';document.getElementById('d1').style.color='black';document.getElementById('d2').style.color='black';document.getElementById('d0').style.color='black';document.getElementById('d4').style.color='black';">EXPERT</a>&nbsp;
+						<a id="d4" onclick="difficult = 4;this.style.color='red';document.getElementById('d1').style.color='black';document.getElementById('d2').style.color='black';document.getElementById('d3').style.color='black';document.getElementById('d0').style.color='black';">EXTREME</a>
+					<p>CONTROLS</p>
+						<a id="c0" onclick="Controls = 0;this.style.color='red';document.getElementById('c2').style.color='red';document.getElementById('c1').style.color='black';document.getElementById('c3').style.color='black';">KEYBOARD</a>&nbsp;
+						<a id="c1" onclick="Controls = 1;this.style.color='red';document.getElementById('c3').style.color='red';document.getElementById('c0').style.color='black';document.getElementById('c2').style.color='black';">MOUSE</a>
+					<p class="color" onclick="start()">START</p>
+				</div>
+				<div id = "menustop">
+					<p class="color" onclick="start()">RESUME</p>
+					<p class="color" onclick="restart()">RESTART</p>
+					<p>CONTROLS</p>
+					<p>
+						<a id="c2" onclick="Controls = 0;this.style.color='red';document.getElementById('c0').style.color='red';document.getElementById('c1').style.color='black';document.getElementById('c3').style.color='black';">KEYBOARD</a>&nbsp;
+						<a id="c3" onclick="Controls = 1;this.style.color='red';document.getElementById('c1').style.color='red';document.getElementById('c0').style.color='black';document.getElementById('c2').style.color='black';">MOUSE</a>
+					</p>
+					<p class="color" onclick="quit()">QUIT</p>
+				</div>
+				<div id="menuend">
+					<p>GAME OVER</p>
+					<p>YOUR SCORE:</p>
+					<p id="pointend"></p>
+					<p class="color" onclick="quit()">Try AGAIN</p>
+				</div>
+			</div>
+		</div>
+		<script>
+			var myVarDelay;
+			var pos;
+			var counter = 0;
+			var x = 135;
+			var v = 5;
+			var vdeplacement = 25;
+			var point = 0;
+			var palier = 5;
+			var dist = 0;
+			var pause = 0;
+			var difficult = 1;
+			var Controls = 1;
+			var vdef = 0;
+			var lifes = 3;
+			
+			document.addEventListener('mousemove',function(evt){
+				if(Controls == 1 && pause == 0){
+					x = evt.clientX;
+					if(x > 270)x=270;
+				}
+			},false)
+			
+			function touche(e){
+				if(Controls == 0 && pause == 0){
+					var touche = event.keyCode;		
+					if(touche == 37){x = x - vdeplacement;}
+					if(touche == 39){x = x + vdeplacement;}
+					if(x > 270)x=270;
+					if(x < 0)x=0;
+				}
+			}
+			
+			function position(){
+					document.getElementById("basket").style.left = x + "px";
+			}
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
-    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' gap:; style-src 'self' 'unsafe-inline'; media-src *" />
-    <!-- Good default declaration:
-    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
-    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-        * Enable inline JS: add 'unsafe-inline' to default-src
-        * Enable eval(): add 'unsafe-eval' to default-src
-    * Create your own at http://cspisawesome.com
-    -->
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
-
-    <link rel="stylesheet" type="text/css" href="css/index.css" />
-    <title>Hello World</title>
-</head>
-
-<body>
-    <div class="app">
-        <h1>PhoneGap</h1>
-        <div id="deviceready" class="blink">
-            <p class="event listening">Connecting to Device</p>
-            <p class="event received">Device is Ready</p>
-        </div>
-    </div>
-    <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
-    <script type="text/javascript">
-        app.initialize();
-    </script>
-</body>
-
+			function start(){
+				speed();
+				document.getElementById("menustart").style.display = "none";
+				pause = 0;
+				document.getElementById("stop").style.display = "block";
+				document.getElementById("menustop").style.display = "none";
+				document.getElementById("score").style.display = "block";
+				myVarDelay = setInterval(jeu,50);
+				pos = setInterval(position,50);
+				
+			}
+			
+			function stop(){
+				clearInterval(myVarDelay);
+				clearInterval(pos);
+				pause = 1;
+				document.getElementById("stop").style.display = "none";
+				document.getElementById("menustop").style.display = "block";
+			}
+			
+			function restart(){
+				point = 0;
+				lifes = 3;
+				document.getElementById("pts").innerHtml = point;
+				document.getElementById("lifes").innerHtml = "LIFES: " + lifes;
+				counter = 0;
+				x = 135;
+				document.getElementById("square").style.top = counter + "px";
+				document.getElementById("square").style.left = "0px";
+				document.getElementById("basket").style.left = x + "px";
+				pause = 0;
+				v = vdef;
+				document.getElementById("menustop").style.display = "none";
+				document.getElementById("stop").style.display = "block";
+				myVarDelay = setInterval(jeu,50);
+				pos = setInterval(position,50);
+			}
+			
+			function quit(){
+				point = 0;
+				lifes = 3;
+				counter = 0;
+				x = 135;
+				document.getElementById("square").style.top = counter + "px";
+				document.getElementById("square").style.left = "0px";
+				document.getElementById("basket").style.left = x + "px";
+				pause = 1;
+				document.getElementById("menustop").style.display = "none";
+				document.getElementById("menustart").style.display = "block";
+				document.getElementById("score").style.display = "none";
+				document.getElementById("menuend").style.display = "none";
+			}
+			
+			function end(){
+				clearInterval(myVarDelay);
+				clearInterval(pos);
+				document.getElementById("menuend").style.display = "block";
+				document.getElementById("score").style.display = "none";
+				document.getElementById("pointend").innerHTML = point;
+			}
+			
+			function speed(){
+				if(difficult != 1){
+					if(difficult == 0)vdef=3;
+					if(difficult == 2)vdef=10;
+					if(difficult == 3)vdef=15;
+					if(difficult == 4)vdef=25;
+				}else {vdef = 5;}
+				v = vdef;
+			}
+						
+			function jeu(){
+				counter = counter + v;
+				if(counter >= 470) {
+					dist = document.getElementById("square").offsetLeft - document.getElementById("basket").offsetLeft;
+					if(counter >= 390 && dist >= -20 && dist <= 20){
+						document.getElementById("square").style.backgroundColor = "red";
+						document.getElementById("square").style.backgroundColor = "#74AD5A";
+						point = point +1;
+						document.getElementById("square").style.backgroundColor = "#74AD5A";
+					}else{lifes = lifes-1;}
+					counter = 0;
+					document.getElementById("square").style.left = Math.floor(Math.random() * 270) + "px";
+					
+				}
+				if(point == palier){v = v*1.1 ;palier = palier +5;}
+				if(v > 35)v = 35;
+				if(lifes == 0){end();}
+				document.getElementById("square").style.top = counter + "px";
+				document.getElementById("pts").innerHTML = point;
+				document.getElementById("lifes").innerHTML = "LIFES: " + lifes;
+			}
+		</script>
+	</body>
 </html>
