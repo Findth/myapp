@@ -143,9 +143,9 @@
 			var vdef = 0;
 			var lifes = 3;
 			
-			document.addEventListener('touchemove',function(evt){
+			document.addEventListener('mousemove',function(evt){
 				if(Controls == 1 && pause == 0){
-					x = evt.touches[0].pageX;
+					x = evt.clientX;
 					if(x > 270)x=270;
 				}
 			},false)
